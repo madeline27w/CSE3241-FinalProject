@@ -1,0 +1,7 @@
+/*  First index  */
+CREATE INDEX ProductIndex
+ON PRODUCT (title);
+
+/*   Second Index    */
+CREATE INDEX SellerIndex
+ON SELLER (name);

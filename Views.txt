@@ -1,0 +1,12 @@
+/*  View 1   */
+CREATE VIEW WANTED_PRODUCTS AS
+SELECT C.name AS "CUSTOMER", P.title AS "WANTS"
+FROM CUSTOMER AS C, WISHLIST AS W, ITEMS_ON_LIST AS I, PRODUCT AS P
+WHERE C.cust_id = W.cust_id AND W.Wish_ID = I.Wishlist_ID AND I.product_id = P.product_id;
+
+/* View 2  */
+CREATE VIEW PNS AS
+SELECT  ST.name AS "STORE", p.title AS "ITEM", P.Product_ID
+FROM STOREFRONT AS ST, SHOWS_PRODUCT AS SH, PRODUCT AS P
+WHERE ST.Storefront_id = SH.Storefront_ID AND SH.Product_ID = P.Product_ID
+ORDER BY ST.Storefront_id
