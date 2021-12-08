@@ -1,15 +1,16 @@
 /*  Extra 1: get products on each customers wishlist  */
 SELECT C.name AS "NAME", P.title AS "ITEM", P.Product_ID AS "ITEM ID"
     	FROM PRODUCT AS P, WISHLIST AS W, CUSTOMER AS C, ITEMS_ON_LIST AS I
-        WHERE C.cust_id = W.cust_id AND I.Wishlist_ID = W.Wish_ID AND I.Product_id = P.Product_ID
+        WHERE C.cust_id = W.cust_id AND I.Wishlist_ID = W.Wish_ID AND I.Product_id = P.Product_ID;
     	
 /*   Extra 2: All storefronts and their servers */
 SELECT ST.Name AS "STORE", ST.Storefront_id AS "STORE ID", SE.Server_id AS "SERVER NUMBER"
     	FROM SERVER AS SE, STOREFRONT AS ST, HOSTED_BY AS HB
-        WHERE HB.Server_id = SE.Server_id AND HB.Storefront_ID = ST.Storefront_id
+        WHERE HB.Server_id = SE.Server_id AND HB.Storefront_ID = ST.Storefront_id;
 
 /*   Extra 3: get all sellers and list the storefronts they have */
 SELECT SE.name AS "SELLER", ST.Name AS "STORE"
     	FROM STOREFRONT AS ST, SELLER as SE
         WHERE ST.seller_id = SE.Seller_id
-        ORDER BY SE.name
+        ORDER BY SE.name;
+    	

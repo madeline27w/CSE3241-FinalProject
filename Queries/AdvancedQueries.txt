@@ -1,0 +1,101 @@
+/* a */
+SELECT C.name AS "CUSTOMER", SUM(OP.ORDER_TOTAL) AS "TOTAL SPENT"
+	FROM CUSTOMER AS C,
+       	(SELECT SUM(P.price) AS "ORDER_TOTAL", C.cust_id, C.name
+    	FROM CUSTOMER AS C, PLACED_BY AS PB, ORDERS AS O, ORDER_BY AS OB, PRODUCT AS P
+    	WHERE  PB.Cust_ID = C.cust_id AND O.PlacedBy_ID = PB.Placed_ID AND O.Order_ID = OB.Order_ID AND OB.Product_ID = P.Product_ID
+   	 	GROUP BY O.order_id
+    	ORDER BY O.order_id) AS OP
+        WHERE C.cust_id = OP.cust_id
+        GROUP BY C.cust_id
+        ORDER BY C.cust_id;
+
+/* b */
+SELECT  C.name AS "NAME", E.email AS "EMAIL"
+          FROM CUSTOMER AS C LEFT OUTER JOIN EMAILS AS E ON C.cust_id = E.cust_id, PLACED_BY AS PB, ORDERS AS O, ORDER_BY AS OB, PRODUCT AS P
+          WHERE  PB.Cust_ID = C.cust_id AND O.PlacedBy_ID = PB.Placed_ID AND O.Order_ID = OB.Order_ID AND OB.Product_ID = P.Product_ID
+          GROUP BY C.cust_id
+          HAVING SUM(P.price) > 
+          			(SELECT AVG(CP.CTOTAL)
+                     FROM
+                    	(SELECT SUM(P.price) AS "CTOTAL"
+         				 FROM CUSTOMER AS C, PLACED_BY AS PB, ORDERS AS O, ORDER_BY AS OB, PRODUCT AS P
+                         WHERE  PB.Cust_ID = C.cust_id AND O.PlacedBy_ID = PB.Placed_ID AND O.Order_ID = OB.Order_ID AND OB.Product_ID = P.Product_ID
+                         GROUP BY C.cust_id
+                         ORDER BY C.cust_id)AS CP);
+                              
+                             
+
+/*  c  */
+SELECT P.title AS "PRODUCT", COUNT(P.product_id) AS "NUMBER SOLD"
+          FROM CUSTOMER AS C, PLACED_BY AS PB, ORDERS AS O, ORDER_BY AS OB, PRODUCT AS P
+          WHERE  PB.Cust_ID = C.cust_id AND O.PlacedBy_ID = PB.Placed_ID AND O.Order_ID = OB.Order_ID AND OB.Product_ID = P.Product_ID
+          GROUP BY P.product_id
+          ORDER BY COUNT(P.product_id) DESC;
+
+/* d */
+SELECT P.title AS "PRODUCT", SUM(P.price) AS "TOTAL REVENUE"
+          FROM CUSTOMER AS C, PLACED_BY AS PB, ORDERS AS O, ORDER_BY AS OB, PRODUCT AS P
+          WHERE  PB.Cust_ID = C.cust_id AND O.PlacedBy_ID = PB.Placed_ID AND O.Order_ID = OB.Order_ID AND OB.Product_ID = P.Product_ID
+          GROUP BY P.product_id
+          ORDER BY SUM(P.price) DESC;
+          
+
+/* e */
+SELECT TS.SELLER, MAX(TS.TOTAL_SOLD) AS "Total Sold"
+    FROM
+    (SELECT SE.name AS "SELLER", COUNT(P.product_id) AS "TOTAL_SOLD"
+              FROM  ORDER_BY AS OB, PRODUCT AS P, SELLER AS SE
+              WHERE   OB.Product_ID = P.Product_ID AND P.seller_id = SE.Seller_id
+              GROUP BY SE.seller_id
+              ORDER BY SE.seller_id) AS TS;
+
+
+/* f */
+SELECT TS.SELLER, MAX(TS.TOTAL_REVENUE) AS "Total REVENUE"
+    FROM
+    (SELECT SE.name AS "SELLER", SUM(P.price) AS "TOTAL_REVENUE"
+              FROM  ORDER_BY AS OB, PRODUCT AS P, SELLER AS SE
+              WHERE   OB.Product_ID = P.Product_ID AND P.seller_id = SE.Seller_id
+              GROUP BY SE.seller_id
+              ORDER BY SE.seller_id) AS TS;
+
+/* g  */
+SELECT C.name AS "NAME"
+FROM CUSTOMER AS C, PLACED_BY AS PB, ORDERS AS O, ORDER_BY AS OB, PRODUCT AS P,
+(SELECT TS.SELLER, MAX(TS.TOTAL_REVENUE) AS "Total REVENUE", TS.Seller_id  
+ 	FROM
+    (SELECT SE.name AS "SELLER", SUM(P.price) AS "TOTAL_REVENUE", SE.Seller_id
+              FROM  ORDER_BY AS OB, PRODUCT AS P, SELLER AS SE
+              WHERE   OB.Product_ID = P.Product_ID AND P.seller_id = SE.Seller_id
+              GROUP BY SE.seller_id
+              ORDER BY SE.seller_id) AS TS) AS TS
+WHERE C.cust_id = PB.Cust_ID AND PB.Placed_ID = O.PlacedBy_ID AND O.Order_ID = OB.Order_ID AND OB.Product_ID = P.Product_ID AND P.Seller_Id = TS.Seller_id;
+
+/*  h  */
+SELECT SE.name AS "SELLER"
+FROM 
+(SELECT  C.cust_id
+          FROM CUSTOMER AS C LEFT OUTER JOIN EMAILS AS E ON C.cust_id = E.cust_id, PLACED_BY AS PB, ORDERS AS O, ORDER_BY AS OB, PRODUCT AS P
+          WHERE  PB.Cust_ID = C.cust_id AND O.PlacedBy_ID = PB.Placed_ID AND O.Order_ID = OB.Order_ID AND OB.Product_ID = P.Product_ID
+          GROUP BY C.cust_id
+          HAVING SUM(P.price) > 
+          			(SELECT AVG(CP.CTOTAL)
+                     FROM
+                    	(SELECT SUM(P.price) AS "CTOTAL"
+         				 FROM CUSTOMER AS C, PLACED_BY AS PB, ORDERS AS O, ORDER_BY AS OB, PRODUCT AS P
+                         WHERE  PB.Cust_ID = C.cust_id AND O.PlacedBy_ID = PB.Placed_ID AND O.Order_ID = OB.Order_ID AND OB.Product_ID = P.Product_ID
+                         GROUP BY C.cust_id
+                         ORDER BY C.cust_id)AS CP)) AS ABOVEAVG,
+        SELLER AS SE, PRODUCT AS P, ORDER_BY AS OB, ORDERS AS O, PLACED_BY AS PB, CUSTOMER AS CUSTOMER
+        WHERE SE.Seller_id = P.seller_id AND P.product_id = OB.product_id AnD OB.Order_ID = O.Order_ID AND O.PlacedBy_ID = PB.Placed_ID AND PB.Placed_ID = ABOVEAVG.cust_id
+        GROUP BY SE.Seller_id;  
+
+
+
+
+/*   i   */
+SELECT ST.name, COUNT(P.product_id) AS "ITEMS SOLD", MAX(P.price) AS "MOST EXPENSIVE", MIN(P.price) AS "LEAST EXPENSIVE", ROUND(AVG(P.price), 2) AS "AVERAGE PRICE"
+FROM STOREFRONT AS ST, SHOWS_PRODUCT AS SP, PRODUCT AS P, ORDER_BY AS OB
+WHERE OB.Product_ID = P.Product_ID AND P.product_id = SP.product_id AND SP.storefront_id = ST.Storefront_id
+GROUP BY ST.Storefront_id
