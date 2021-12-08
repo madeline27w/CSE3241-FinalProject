@@ -1,0 +1,64 @@
+/* a */
+Select title, name
+FROM PRODUCT AS P, STOREFRONT AS S
+WHERE p.Product_ID = s.product_id;
+
+/* b */
+SELECT title, price
+FROM PRODUCT as P
+WHERE P.price < 10;
+
+/* c */
+SELECT name as "BUYER", O.Order_date AS "DATE OF PURCHASE", P.Title AS "ITEM"
+FROM CUSTOMER AS C, PLACED_BY AS PB, ORDERS AS O, ORDER_BY AS OB, PRODUCT AS P
+WHERE C.cust_id = 1 AND PB.Cust_ID = C.cust_id AND O.PlacedBy_ID = PB.Placed_ID AND O.Order_ID = OB.Order_ID AND OB.Product_ID = P.Product_ID
+ORDER BY C.name;
+
+
+/* d */
+SELECT C.name as "BUYER", P.Title AS "ITEM"
+FROM CUSTOMER AS C, PLACED_BY AS PB, ORDERS AS O, ORDER_BY AS OB, PRODUCT AS P, STOREFRONT AS ST, SHOWS_PRODUCT AS SH
+WHERE ST.storefront_id = 1 AND PB.Cust_ID = C.cust_id AND O.PlacedBy_ID = PB.Placed_ID AND O.Order_ID = OB.Order_ID AND OB.Product_ID = P.Product_ID AND SH.product_id = P.product_id AND SH.Storefront_ID = ST.Storefront_id
+ORDER BY C.name;
+
+/* e */
+SELECT CUSTOMER.name AS "Most Active Buyer", MAX(OC.name_count) as "Total Items Purchased"
+	FROM	CUSTOMER,
+       	(SELECT COUNT(c.cust_id) AS "name_count"
+    	FROM CUSTOMER AS C, PLACED_BY AS PB, ORDERS AS O, ORDER_BY AS OB, PRODUCT AS P
+    	WHERE  PB.Cust_ID = C.cust_id AND O.PlacedBy_ID = PB.Placed_ID AND O.Order_ID = OB.Order_ID AND OB.Product_ID = P.Product_ID
+   	 	GROUP BY c.cust_id
+    	ORDER BY C.name) AS OC;
+
+/* f */
+SELECT name, Count(sp.storefront_id) AS "Number of Products"
+FROM STOREFRONT as S, SHOWS_PRODUCT AS SP
+WHERE S.storefront_id = SP.storefront_id
+GROUP BY sp.storefront_id
+HAVING COUNT(sp.storefront_id) < 5;
+
+/* g */
+SELECT P.title AS "Best Seller", MAX(PCount.Amount_Sold) as "Total Items Purchased", P.price * MAX(PCount.Amount_Sold) AS "Total Profits", ST.name AS "Store", SE.name AS "SELLER"
+	FROM	PRODUCT as P, STOREFRONT AS ST, SHOWS_PRODUCT AS SH, SELLER AS SE,
+       	(SELECT COUNT(P.product_id) AS "Amount_Sold" 
+    	FROM CUSTOMER AS C, PLACED_BY AS PB, ORDERS AS O, ORDER_BY AS OB, PRODUCT AS P
+    	WHERE  PB.Cust_ID = C.cust_id AND O.PlacedBy_ID = PB.Placed_ID AND O.Order_ID = OB.Order_ID AND OB.Product_ID = P.Product_ID
+   	 	GROUP BY P.product_id
+    	ORDER BY P.title) AS PCount
+        WHERE P.product_id = SH.Product_ID AND SH.Storefront_ID = ST.Storefront_id;
+
+/* h */
+SELECT PAY.payment_type AS "TYPE", COUNT(PAY.payment_type) AS "Times Charged", SUM(OH.amount) as "Total Amount"
+    	FROM PAYMENT_TYPE AS PAY, ORDERS AS O, ORDER_BY AS OB, PRODUCT AS P, ORDER_HAS AS OH
+    	WHERE  P.product_id = OB.Product_ID AND OB.Order_ID = O.Order_ID AND O.Order_ID = OH.Order_ID AND OH.Payment_ID = PAY.payment_id
+   	 	GROUP BY PAY.payment_type
+    	ORDER BY P.title;
+       
+        
+
+
+/* I */
+SELECT C.name AS "NAME", MAX(C.karma) AS "KARMA", E.email AS "EMAIL"
+    	FROM CUSTOMER AS C, EMAILS AS E
+        WHERE C.cust_id = E.cust_id;
+    	
